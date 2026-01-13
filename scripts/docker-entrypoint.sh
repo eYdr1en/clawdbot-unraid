@@ -80,7 +80,12 @@ if [ ! -f "$MARKER_FILE" ]; then
         --gateway-port "${CLAWDBOT_GATEWAY_PORT:-18789}" \
         --gateway-bind loopback
 
-    if [ $? -eq 0 ]; then
+    ONBOARD_EXIT=$?
+    echo ""
+    echo "DEBUG: Onboarding exit code: $ONBOARD_EXIT"
+    echo ""
+
+    if [ $ONBOARD_EXIT -eq 0 ]; then
         echo ""
         echo "==================================="
         echo "Onboarding Complete!"
@@ -124,6 +129,11 @@ echo "==================================="
 echo "Starting ClawdBot Gateway..."
 echo "==================================="
 echo ""
+echo "DEBUG: About to exec command: $@"
+echo "DEBUG: User: $(whoami)"
+echo "DEBUG: Working directory: $(pwd)"
+echo ""
 
 # Execute main command as clawdbot user
+echo "DEBUG: Running: su-exec clawdbot:clawdbot $@"
 exec su-exec clawdbot:clawdbot "$@"
