@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# GitHub
+.github
+
+# Documentation
+*.md
+LICENSE
+docs/
+
+# Templates and Icons
+templates/
+icons/
+
+# Testing
+test-config/
+test-workspace/
+*.test.js
+*.spec.js
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.cache
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Build artifacts
+dist/
+build/

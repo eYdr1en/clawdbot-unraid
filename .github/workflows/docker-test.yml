@@ -1,0 +1,161 @@
+name: Test Docker Build
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+        include:
+          - platform: linux/amd64
+            arch: amd64
+          - platform: linux/arm64
+            arch: arm64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: ${{ matrix.platform }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build test image (${{ matrix.arch }})
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: ${{ matrix.platform }}
+          push: false
+          tags: clawdbot-unraid:test-${{ matrix.arch }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Test image structure (amd64 only)
+        if: matrix.arch == 'amd64'
+        run: |
+          # Build for local testing
+          docker buildx build --load --platform linux/amd64 -t clawdbot-unraid:test .
+
+          echo "Testing image contents..."
+
+          # Test 1: Verify Node.js version
+          echo "✓ Testing Node.js version..."
+          docker run --rm clawdbot-unraid:test node --version | grep "v22"
+
+          # Test 2: Verify ClawdBot is installed
+          echo "✓ Testing ClawdBot installation..."
+          docker run --rm clawdbot-unraid:test which clawdbot
+
+          # Test 3: Verify entrypoint script exists
+          echo "✓ Testing entrypoint script..."
+          docker run --rm clawdbot-unraid:test test -x /usr/local/bin/docker-entrypoint.sh
+
+          # Test 4: Verify non-root user
+          echo "✓ Testing non-root user..."
+          docker run --rm --entrypoint="" clawdbot-unraid:test id | grep "uid=1000(clawdbot)"
+
+          # Test 5: Verify directories
+          echo "✓ Testing directory structure..."
+          docker run --rm --entrypoint="" clawdbot-unraid:test test -d /config
+          docker run --rm --entrypoint="" clawdbot-unraid:test test -d /workspace
+
+          echo "✅ All tests passed!"
+
+  lint-dockerfile:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run hadolint (Dockerfile linter)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: warning
+
+  validate-template:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate XML template
+        run: |
+          echo "Validating Unraid template..."
+
+          # Check XML is well-formed
+          if ! xmllint --noout templates/clawdbot.xml 2>/dev/null; then
+            echo "❌ XML template is malformed"
+            exit 1
+          fi
+
+          echo "✅ XML template is valid"
+
+          # Check required fields
+          echo "Checking required fields..."
+
+          required_fields=("Name" "Repository" "WebUI" "Icon" "Category")
+          for field in "${required_fields[@]}"; do
+            if ! grep -q "<$field>" templates/clawdbot.xml; then
+              echo "❌ Missing required field: $field"
+              exit 1
+            fi
+            echo "✓ Found: $field"
+          done
+
+          echo "✅ All required fields present"
+
+  check-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check documentation
+        run: |
+          echo "Checking documentation files..."
+
+          required_docs=(
+            "README.md"
+            "docs/INSTALLATION.md"
+            "docs/CONFIGURATION.md"
+            "docs/PROVIDERS.md"
+            "docs/TROUBLESHOOTING.md"
+          )
+
+          for doc in "${required_docs[@]}"; do
+            if [ ! -f "$doc" ]; then
+              echo "❌ Missing documentation: $doc"
+              exit 1
+            fi
+            echo "✓ Found: $doc"
+          done
+
+          echo "✅ All documentation files present"
+
+          # Check for broken links in README
+          echo "Checking for common documentation issues..."
+
+          if grep -q "TODO" README.md; then
+            echo "⚠️  Warning: Found TODO items in README"
+          fi
+
+          if grep -q "\[YOUR-USERNAME\]" templates/clawdbot.xml; then
+            echo "⚠️  Warning: Template contains placeholder [YOUR-USERNAME]"
+          fi
+
+          echo "✅ Documentation checks complete"

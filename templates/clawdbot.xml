@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>ClawdBot</Name>
+  <Repository>ghcr.io/eydr1en/clawdbot-unraid:latest</Repository>
+  <Registry>https://github.com/eYdr1en/clawdbot-unraid/pkgs/container/clawdbot-unraid</Registry>
+  <Network>bridge</Network>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/eYdr1en/clawdbot-unraid/issues</Support>
+  <Project>https://github.com/clawdbot/clawdbot</Project>
+  <Overview>ClawdBot is your personal AI assistant powered by Anthropic's Claude. It connects Claude to your favorite messaging platforms including WhatsApp, Telegram, Discord, Signal, iMessage, and WebChat. Features include voice capabilities, browser automation, canvas rendering, and tool execution through plugins. Self-hosted for complete privacy and control.</Overview>
+  <Category>Productivity: Status:Stable</Category>
+  <WebUI>http://[IP]:[PORT:18789]</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/eYdr1en/clawdbot-unraid/main/templates/clawdbot.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/eYdr1en/clawdbot-unraid/main/icons/clawdbot.png</Icon>
+  <ExtraParams>--init</ExtraParams>
+  <DateInstalled></DateInstalled>
+
+  <!-- Required: Anthropic API Key -->
+  <Config Name="Anthropic API Key" Target="ANTHROPIC_API_KEY" Default="" Mode="" Description="Your Anthropic API key (required). Get one at https://console.anthropic.com/ by navigating to Settings → API Keys." Type="Variable" Display="always" Required="true" Mask="true"/>
+
+  <!-- Gateway Port -->
+  <Config Name="Gateway Port" Target="18789" Default="18789" Mode="tcp" Description="Gateway WebUI and API port. Access the ClawdBot web interface at http://[IP]:[PORT:18789]" Type="Port" Display="always" Required="true"/>
+
+  <!-- Bridge Port -->
+  <Config Name="Bridge Port" Target="18790" Default="18790" Mode="tcp" Description="Bridge communication port for internal ClawdBot services" Type="Port" Display="always" Required="true"/>
+
+  <!-- Config Directory -->
+  <Config Name="Config Directory" Target="/config" Default="/mnt/user/appdata/clawdbot" Mode="rw" Description="Directory for ClawdBot configuration, sessions, and provider data. This is where all persistent data is stored." Type="Path" Display="always" Required="true"/>
+
+  <!-- Workspace Directory -->
+  <Config Name="Workspace Directory" Target="/workspace" Default="/mnt/user/appdata/clawdbot/workspace" Mode="rw" Description="Working directory for Claude Code execution and file operations" Type="Path" Display="advanced" Required="false"/>
+
+  <!-- User/Group IDs -->
+  <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="User ID for file permissions. Use 99 for nobody user on Unraid, or your user's ID." Type="Variable" Display="advanced" Required="false"/>
+
+  <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="Group ID for file permissions. Use 100 for users group on Unraid, or your group's ID." Type="Variable" Display="advanced" Required="false"/>
+
+  <!-- Port Environment Variables (hidden, auto-synced) -->
+  <Config Name="Gateway Port (ENV)" Target="CLAWDBOT_GATEWAY_PORT" Default="18789" Mode="" Description="Gateway port environment variable (must match port mapping)" Type="Variable" Display="advanced-hide" Required="false"/>
+
+  <Config Name="Bridge Port (ENV)" Target="CLAWDBOT_BRIDGE_PORT" Default="18790" Mode="" Description="Bridge port environment variable (must match port mapping)" Type="Variable" Display="advanced-hide" Required="false"/>
+
+  <!-- Provider Enable Toggles -->
+  <Config Name="Enable WhatsApp" Target="WHATSAPP_ENABLED" Default="false|true" Mode="" Description="Enable WhatsApp provider. Requires WhatsApp Business API or compatible service. Configure in WebUI after enabling." Type="Variable" Display="always" Required="false"/>
+
+  <Config Name="Enable Telegram" Target="TELEGRAM_ENABLED" Default="false|true" Mode="" Description="Enable Telegram provider. Requires Telegram bot token from @BotFather. Configure in WebUI after enabling." Type="Variable" Display="always" Required="false"/>
+
+  <Config Name="Enable Discord" Target="DISCORD_ENABLED" Default="false|true" Mode="" Description="Enable Discord provider. Requires Discord bot token from Discord Developer Portal. Configure in WebUI after enabling." Type="Variable" Display="always" Required="false"/>
+
+  <Config Name="Enable Signal" Target="SIGNAL_ENABLED" Default="false|true" Mode="" Description="Enable Signal provider. Requires signal-cli setup (advanced). Configure in WebUI after enabling." Type="Variable" Display="always" Required="false"/>
+
+  <Config Name="Enable iMessage" Target="IMESSAGE_ENABLED" Default="false|true" Mode="" Description="Enable iMessage provider. Requires macOS host with imsg (advanced, macOS only). Configure in WebUI after enabling." Type="Variable" Display="always" Required="false"/>
+
+  <Config Name="Enable WebChat" Target="WEBCHAT_ENABLED" Default="true" Mode="" Description="Enable WebChat interface. This is the built-in web interface accessible via WebUI. Recommended to keep enabled." Type="Variable" Display="always" Required="false"/>
+
+  <!-- Advanced: Log Level -->
+  <Config Name="Log Level" Target="LOG_LEVEL" Default="info" Mode="" Description="Logging verbosity level. Options: debug, info, warn, error. Use 'debug' for troubleshooting." Type="Variable" Display="advanced" Required="false"/>
+
+  <!-- Advanced: Timezone -->
+  <Config Name="Timezone" Target="TZ" Default="UTC" Mode="" Description="Timezone for container (e.g., America/New_York, Europe/London, etc.)" Type="Variable" Display="advanced" Required="false"/>
+
+  <!-- Advanced: Node Environment -->
+  <Config Name="Node Environment" Target="NODE_ENV" Default="production" Mode="" Description="Node.js environment mode. Keep as 'production' unless debugging." Type="Variable" Display="advanced-hide" Required="false"/>
+
+  <!-- Changelog -->
+  <Changes>
+### v1.0.0 (2026-01-13)
+- Initial release for Unraid Community Applications
+- Support for all messaging providers: WhatsApp, Telegram, Discord, Signal, iMessage, WebChat
+- Automated onboarding with Anthropic API key authentication
+- WebUI for configuration and management at http://[IP]:18789
+- Multi-platform support (amd64, arm64)
+- Non-root user execution for enhanced security
+- Health monitoring and automatic recovery
+- Persistent configuration and session storage
+- Comprehensive documentation and troubleshooting guides
+  </Changes>
+
+  <!-- Post Arguments (empty for this container) -->
+  <PostArgs></PostArgs>
+
+  <!-- Description -->
+  <Description>
+ClawdBot is your personal AI assistant powered by Anthropic's Claude, packaged for easy deployment on Unraid.
+
+**Key Features:**
+- 🤖 Powered by Claude AI (Anthropic API)
+- 💬 Multi-platform: WhatsApp, Telegram, Discord, Signal, iMessage, WebChat
+- 🌐 Built-in WebUI for easy configuration
+- 🔧 Automated setup with non-interactive onboarding
+- 🔒 Secure: Non-root execution, encrypted credentials
+- 📦 Multi-architecture: Supports amd64 and arm64
+
+**Quick Start:**
+1. Get your Anthropic API key from https://console.anthropic.com/
+2. Install this container and enter your API key
+3. Access WebUI at http://[IP]:18789
+4. Configure your preferred messaging providers
+5. Start chatting with Claude!
+
+**First-Time Setup:**
+The container will automatically run onboarding on first start. This process:
+- Initializes ClawdBot with your API key
+- Sets up the gateway daemon
+- Creates necessary configuration files
+- Takes about 30-60 seconds
+
+**Provider Configuration:**
+All providers (except WebChat) require additional setup:
+- **Telegram**: Create bot via @BotFather, paste token in WebUI
+- **Discord**: Create bot in Discord Developer Portal, paste token in WebUI
+- **WhatsApp/Signal/iMessage**: See documentation for advanced setup
+
+**Support:**
+- Documentation: https://github.com/eYdr1en/clawdbot-unraid
+- Issues: https://github.com/eYdr1en/clawdbot-unraid/issues
+- Official ClawdBot: https://github.com/clawdbot/clawdbot
+
+**Note:** This is an unofficial community packaging of ClawdBot for Unraid.
+  </Description>
+</Container>

@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  clawdbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: clawdbot-unraid:local
+    container_name: clawdbot-test
+    restart: unless-stopped
+    init: true
+    ports:
+      - "18789:18789"  # Gateway WebUI/API
+      - "18790:18790"  # Bridge communication
+    volumes:
+      - ./test-config:/config
+      - ./test-workspace:/workspace
+    environment:
+      # Required: Anthropic API Key
+      # Get yours at: https://console.anthropic.com/
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+      # Port Configuration
+      - CLAWDBOT_GATEWAY_PORT=18789
+      - CLAWDBOT_BRIDGE_PORT=18790
+
+      # Provider Toggles (optional)
+      - WHATSAPP_ENABLED=${WHATSAPP_ENABLED:-false}
+      - TELEGRAM_ENABLED=${TELEGRAM_ENABLED:-false}
+      - DISCORD_ENABLED=${DISCORD_ENABLED:-false}
+      - SIGNAL_ENABLED=${SIGNAL_ENABLED:-false}
+      - IMESSAGE_ENABLED=${IMESSAGE_ENABLED:-false}
+      - WEBCHAT_ENABLED=${WEBCHAT_ENABLED:-true}
+
+      # System Configuration
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - TZ=${TZ:-UTC}
+      - NODE_ENV=production
+
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:18789/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+
+# Networks (using default bridge network)
+networks:
+  default:
+    driver: bridge
