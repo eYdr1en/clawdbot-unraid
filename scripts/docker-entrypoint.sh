@@ -61,20 +61,15 @@ if [ "$PUID" != "1000" ] || [ "$PGID" != "1000" ]; then
     chown -R "$PUID:$PGID" /home/clawdbot 2>/dev/null || true
 fi
 
-# First-run initialization
-if [ ! -f "$MARKER_FILE" ]; then
-    echo ""
-    echo "==================================="
-    echo "First Run Detected"
-    echo "==================================="
-    echo "Creating configuration..."
-    echo ""
+# Ensure config directory exists
+mkdir -p "$CONFIG_DIR/.clawdbot/agents/main"
 
-    # Create config directory structure
-    mkdir -p "$CONFIG_DIR/.clawdbot/agents/main"
-
-    # Create minimal config file
-    cat > "$CONFIG_DIR/.clawdbot/clawdbot.json" <<EOF
+# Always create/recreate config file to ensure correct structure
+echo ""
+echo "==================================="
+echo "Configuring ClawdBot..."
+echo "==================================="
+cat > "$CONFIG_DIR/.clawdbot/clawdbot.json" <<EOF
 {
   "gateway": {
     "mode": "local",
@@ -85,19 +80,19 @@ if [ ! -f "$MARKER_FILE" ]; then
 }
 EOF
 
-    # Set ownership
-    chown -R "$PUID:$PGID" "$CONFIG_DIR/.clawdbot"
+# Set ownership
+chown -R "$PUID:$PGID" "$CONFIG_DIR/.clawdbot"
 
-    # Create marker file
+# Create marker file if it doesn't exist
+if [ ! -f "$MARKER_FILE" ]; then
     touch "$MARKER_FILE"
     chown "$PUID:$PGID" "$MARKER_FILE"
-
-    echo "Configuration created successfully!"
-    echo "WebUI will be available at http://[YOUR-IP]:${CLAWDBOT_GATEWAY_PORT:-18789}"
+    echo "First run - configuration created!"
 else
-    echo ""
-    echo "ClawdBot already initialized (found $MARKER_FILE)"
+    echo "Configuration updated!"
 fi
+
+echo "WebUI will be available at http://[YOUR-IP]:${CLAWDBOT_GATEWAY_PORT:-18789}"
 
 # Display provider status
 echo ""
