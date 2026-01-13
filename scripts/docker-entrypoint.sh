@@ -67,46 +67,35 @@ if [ ! -f "$MARKER_FILE" ]; then
     echo "==================================="
     echo "First Run Detected"
     echo "==================================="
-    echo "Running automated onboarding..."
+    echo "Creating configuration..."
     echo ""
 
-    # Run onboarding as the clawdbot user
-    # Note: Skip --install-daemon as we're in a Docker container
-    su-exec clawdbot:clawdbot clawdbot onboard \
-        --non-interactive \
-        --mode local \
-        --auth-choice apiKey \
-        --anthropic-api-key "$ANTHROPIC_API_KEY" \
-        --gateway-port "${CLAWDBOT_GATEWAY_PORT:-18789}" \
-        --gateway-bind loopback
+    # Create config directory structure
+    mkdir -p "$CONFIG_DIR/.clawdbot/agents/main"
 
-    ONBOARD_EXIT=$?
-    echo ""
-    echo "DEBUG: Onboarding exit code: $ONBOARD_EXIT"
-    echo ""
+    # Create minimal config file
+    cat > "$CONFIG_DIR/.clawdbot/clawdbot.json" <<EOF
+{
+  "gateway": {
+    "port": ${CLAWDBOT_GATEWAY_PORT:-18789},
+    "bind": "0.0.0.0"
+  },
+  "workspace": "/workspace"
+}
+EOF
 
-    if [ $ONBOARD_EXIT -eq 0 ]; then
-        echo ""
-        echo "==================================="
-        echo "Onboarding Complete!"
-        echo "==================================="
+    # Set ownership
+    chown -R "$PUID:$PGID" "$CONFIG_DIR/.clawdbot"
 
-        # Create marker file to prevent re-onboarding
-        touch "$MARKER_FILE"
-        chown "$PUID:$PGID" "$MARKER_FILE"
+    # Create marker file
+    touch "$MARKER_FILE"
+    chown "$PUID:$PGID" "$MARKER_FILE"
 
-        echo "ClawdBot has been initialized successfully."
-        echo "WebUI will be available at http://[YOUR-IP]:${CLAWDBOT_GATEWAY_PORT:-18789}"
-    else
-        echo ""
-        echo "ERROR: Onboarding failed!"
-        echo "Please check the logs above for details."
-        exit 1
-    fi
+    echo "Configuration created successfully!"
+    echo "WebUI will be available at http://[YOUR-IP]:${CLAWDBOT_GATEWAY_PORT:-18789}"
 else
     echo ""
     echo "ClawdBot already initialized (found $MARKER_FILE)"
-    echo "Skipping onboarding..."
 fi
 
 # Display provider status
@@ -129,11 +118,12 @@ echo "==================================="
 echo "Starting ClawdBot Gateway..."
 echo "==================================="
 echo ""
-echo "DEBUG: About to exec command: $@"
-echo "DEBUG: User: $(whoami)"
-echo "DEBUG: Working directory: $(pwd)"
+echo "Command: $@"
+echo "Config: $CONFIG_DIR/.clawdbot/clawdbot.json"
 echo ""
 
+# Export API key for clawdbot to use
+export ANTHROPIC_API_KEY
+
 # Execute main command as clawdbot user
-echo "DEBUG: Running: su-exec clawdbot:clawdbot $@"
 exec su-exec clawdbot:clawdbot "$@"
