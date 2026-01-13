@@ -65,7 +65,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD wget --quiet --tries=1 --spider http://localhost:18789/ || exit 1
 
 # Use tini for proper signal handling
-ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "-s", "--", "/usr/local/bin/docker-entrypoint.sh"]
 
 # Default command - run gateway in foreground (not daemon mode for Docker)
 CMD ["clawdbot", "gateway"]

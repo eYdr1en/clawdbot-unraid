@@ -77,6 +77,7 @@ if [ ! -f "$MARKER_FILE" ]; then
     cat > "$CONFIG_DIR/.clawdbot/clawdbot.json" <<EOF
 {
   "gateway": {
+    "mode": "local",
     "port": ${CLAWDBOT_GATEWAY_PORT:-18789},
     "bind": "0.0.0.0"
   },
