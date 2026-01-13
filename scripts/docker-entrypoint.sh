@@ -118,8 +118,10 @@ echo "Command: $@"
 echo "Config: $CONFIG_DIR/.clawdbot/clawdbot.json"
 echo ""
 
-# Export API key for clawdbot to use
+# Export environment variables for clawdbot to use
 export ANTHROPIC_API_KEY
+export CLAWDBOT_CONFIG_PATH="$CONFIG_DIR/.clawdbot/clawdbot.json"
+export CLAWDBOT_STATE_DIR="$CONFIG_DIR/.clawdbot"
 
 # Execute main command as clawdbot user
 exec su-exec clawdbot:clawdbot "$@"

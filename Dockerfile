@@ -52,6 +52,8 @@ EXPOSE 18789 18790
 # Environment defaults
 ENV NODE_ENV=production \
     CLAWDBOT_CONFIG_DIR=/config \
+    CLAWDBOT_CONFIG_PATH=/config/.clawdbot/clawdbot.json \
+    CLAWDBOT_STATE_DIR=/config/.clawdbot \
     CLAWDBOT_GATEWAY_PORT=18789 \
     CLAWDBOT_BRIDGE_PORT=18790 \
     PUID=1000 \
