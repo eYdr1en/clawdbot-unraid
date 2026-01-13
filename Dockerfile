@@ -14,7 +14,8 @@ RUN apk add --no-cache \
     su-exec \
     shadow \
     tini \
-    curl
+    curl \
+    git
 
 # Create non-root user and group
 # Use -o flag to allow overlapping GID/UID if they exist
