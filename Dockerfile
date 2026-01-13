@@ -15,7 +15,11 @@ RUN apk add --no-cache \
     shadow \
     tini \
     curl \
-    git
+    git \
+    python3 \
+    make \
+    g++ \
+    linux-headers
 
 # Create non-root user and group
 # Use -o flag to allow overlapping GID/UID if they exist
@@ -28,7 +32,8 @@ WORKDIR /app
 
 # Install clawdbot globally
 # Using --legacy-peer-deps to avoid potential peer dependency issues
-RUN npm install -g clawdbot@latest --legacy-peer-deps && \
+# Skip optional dependencies like clipboard that may have native module issues
+RUN npm install -g clawdbot@latest --no-optional --legacy-peer-deps && \
     npm cache clean --force
 
 # Create necessary directories with proper permissions
