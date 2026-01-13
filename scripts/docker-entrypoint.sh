@@ -71,15 +71,14 @@ if [ ! -f "$MARKER_FILE" ]; then
     echo ""
 
     # Run onboarding as the clawdbot user
+    # Note: Skip --install-daemon as we're in a Docker container
     su-exec clawdbot:clawdbot clawdbot onboard \
         --non-interactive \
         --mode local \
         --auth-choice apiKey \
         --anthropic-api-key "$ANTHROPIC_API_KEY" \
         --gateway-port "${CLAWDBOT_GATEWAY_PORT:-18789}" \
-        --gateway-bind loopback \
-        --install-daemon \
-        --daemon-runtime node
+        --gateway-bind loopback
 
     if [ $? -eq 0 ]; then
         echo ""

@@ -62,5 +62,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 # Use tini for proper signal handling
 ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
 
-# Default command (can be overridden)
-CMD ["clawdbot", "gateway", "daemon"]
+# Default command - run gateway in foreground (not daemon mode for Docker)
+CMD ["clawdbot", "gateway"]
