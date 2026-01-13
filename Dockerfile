@@ -17,8 +17,10 @@ RUN apk add --no-cache \
     curl
 
 # Create non-root user and group
-RUN addgroup -g 1000 clawdbot && \
-    adduser -D -u 1000 -G clawdbot -s /bin/sh clawdbot
+# Use -o flag to allow overlapping GID/UID if they exist
+RUN addgroup -S clawdbot 2>/dev/null || addgroup -S -g 1000 clawdbot || true && \
+    adduser -S -D -H -s /bin/sh -G clawdbot clawdbot 2>/dev/null || \
+    adduser -S -D -H -u 1000 -s /bin/sh -G clawdbot clawdbot || true
 
 # Set working directory
 WORKDIR /app
